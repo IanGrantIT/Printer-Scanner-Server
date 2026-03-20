@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Print Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      background: black;
+      color: #00ff66;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 40px;
+    }
+
+    label {
+      display: block;
+      text-align: left;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .box {
+      border: 1px solid #00ff66;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 420px;
+      margin: auto;
+    }
+
+    input, button, a.portal-btn {
+      margin-top: 10px;
+      padding: 10px;
+      width: 100%;
+      background: black;
+      color: #00ff66;
+      border: 1px solid #00ff66;
+      border-radius: 6px;
+      box-sizing: border-box;
+      text-decoration: none;
+      display: block;
+      font-size: 14px;
+    }
+
+    button, a.portal-btn {
+      cursor: pointer;
+      background: #00ff66;
+      color: black;
+      font-weight: bold;
+    }
+
+    #status {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    .secondary-btn {
+      background: black !important;
+      color: #00ff66 !important;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>Print Portal</h2>
+
+  <input type="file" id="file">
+
+  <label for="copies">Number of Copies:</label>
+  <input
+    type="number"
+    id="copies"
+    min="1"
+    max="50"
+    value="1"
+    placeholder="Number of copies"
+  >
+
+  <button onclick="printFile()">Print</button>
+
+  <a class="portal-btn secondary-btn" href="/scan.html">Open Scanner</a>
+
+  <div id="status">Ready</div>
+</div>
+
+<script>
+async function printFile() {
+  const fileInput = document.getElementById("file");
+  const copiesInput = document.getElementById("copies");
+  const status = document.getElementById("status");
+
+  if (!fileInput.files.length) {
+    status.innerText = "Select a file first";
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", fileInput.files[0]);
+  formData.append("copies", copiesInput.value);
+
+  status.innerText = "Printing...";
+
+  try {
+    const res = await fetch("/api/print", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await res.json();
+
+    if (data.ok) {
+      status.innerText = `Printed ${copiesInput.value} copies successfully`;
+    } else {
+      status.innerText = "Error: " + data.error;
+    }
+
+  } catch (err) {
+    status.innerText = "Network error";
+  }
+}
+</script>
+
+</body>
+</html>
