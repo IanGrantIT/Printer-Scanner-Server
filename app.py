@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import os
 import cups
@@ -7,8 +8,9 @@ import time
 import shutil
 
 app = Flask(__name__)
+CORS(app)
 
-# Base folder = folder where this server.py file lives
+# Base folder = folder where this file lives
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
@@ -26,7 +28,6 @@ def allowed_file(filename):
 
 
 def get_scanimage_path():
-    """Find scanimage binary."""
     path = shutil.which("scanimage")
     return path if path else "/usr/bin/scanimage"
 
@@ -58,7 +59,6 @@ def print_file():
     filepath = os.path.join(UPLOAD_FOLDER, filename)
     file.save(filepath)
 
-    # Copies support
     copies = request.form.get("copies", "1")
     try:
         copies = int(copies)
@@ -71,11 +71,7 @@ def print_file():
 
     try:
         conn = cups.Connection()
-
-        # CUPS option for copies
-        options = {
-            "copies": str(copies)
-        }
+        options = {"copies": str(copies)}
 
         job_id = conn.printFile(
             PRINTER_NAME,
@@ -111,18 +107,12 @@ def scan_file():
             "error": "Unsupported scan format. Use png, jpg, jpeg, tif, or pnm."
         }), 400
 
-    # JPEG sometimes isn't directly supported by all scanners via scanimage output
-    # Safer default for broad compatibility is png via pnm -> convert, but to keep it simple:
-    # we'll allow direct output extension and note that png/pnm/tif are most reliable.
     timestamp = int(time.time())
     filename = f"scan-{timestamp}.{scan_format}"
     filepath = os.path.join(SCAN_FOLDER, filename)
 
     scanimage_path = get_scanimage_path()
 
-    # Basic scanimage command
-    # You can later pin a specific device with:
-    # --device-name "brother4:net1;dev0"
     cmd = [
         scanimage_path,
         "--format", scan_format,
@@ -140,7 +130,6 @@ def scan_file():
             )
 
         if result.returncode != 0:
-            # Remove empty/bad file if scan failed
             if os.path.exists(filepath):
                 try:
                     os.remove(filepath)
@@ -159,9 +148,7 @@ def scan_file():
                 "error": "Scan failed or returned empty file"
             }), 500
 
-        file_url = f"/scans/{filename}"
-
-        # For image formats we can use the same file as thumbnail
+        file_url = f"http://192.168.1.64:5001/scans/{filename}"
         thumbnail_url = file_url if scan_format in {"png", "jpg", "jpeg"} else None
 
         return jsonify({
@@ -191,4 +178,4 @@ def serve_scan(filename):
 
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5001)
+    app.run(host="0.0.0.0", port=5001, debug=False, use_reloader=False)
