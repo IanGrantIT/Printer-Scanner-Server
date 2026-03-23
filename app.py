@@ -97,18 +97,24 @@ def print_file():
 def scan_file():
     data = request.get_json(silent=True) or {}
 
-    scan_format = data.get("format", "png").lower()
+    requested_format = data.get("format", "png").lower()
     mode = data.get("mode", "Color")
     resolution = str(data.get("resolution", "300"))
 
-    if scan_format not in {"png", "jpg", "jpeg", "tif", "pnm"}:
+    if requested_format not in {"png", "jpg", "jpeg", "tif", "pnm"}:
         return jsonify({
             "ok": False,
             "error": "Unsupported scan format. Use png, jpg, jpeg, tif, or pnm."
         }), 400
 
+    # scanimage expects "jpeg", not "jpg"
+    scan_format = "jpeg" if requested_format == "jpg" else requested_format
+
+    # saved file can still use .jpg so it looks normal
+    file_ext = "jpg" if requested_format == "jpg" else requested_format
+
     timestamp = int(time.time())
-    filename = f"scan-{timestamp}.{scan_format}"
+    filename = f"scan-{timestamp}.{file_ext}"
     filepath = os.path.join(SCAN_FOLDER, filename)
 
     scanimage_path = get_scanimage_path()
@@ -149,7 +155,7 @@ def scan_file():
             }), 500
 
         file_url = f"http://192.168.1.64:5001/scans/{filename}"
-        thumbnail_url = file_url if scan_format in {"png", "jpg", "jpeg"} else None
+        thumbnail_url = file_url if file_ext in {"png", "jpg", "jpeg"} else None
 
         return jsonify({
             "ok": True,
