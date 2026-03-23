@@ -80,7 +80,7 @@
 
   <button onclick="printFile()">Print</button>
 
-  <a class="portal-btn secondary-btn" href="/scan.html">Open Scanner</a>
+  <a class="portal-btn secondary-btn" href="/print/scan.html">Open Scanner</a>
 
   <div id="status">Ready</div>
 </div>
@@ -103,7 +103,7 @@ async function printFile() {
   status.innerText = "Printing...";
 
   try {
-    const res = await fetch("/api/print", {
+    const res = await fetch("http://192.168.1.64:5001/api/print", {
       method: "POST",
       body: formData
     });
