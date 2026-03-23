@@ -28,7 +28,7 @@
       margin: auto;
     }
 
-    input, button, a.portal-btn {
+    input, button {
       margin-top: 10px;
       padding: 10px;
       width: 100%;
@@ -37,12 +37,10 @@
       border: 1px solid #00ff66;
       border-radius: 6px;
       box-sizing: border-box;
-      text-decoration: none;
-      display: block;
       font-size: 14px;
     }
 
-    button, a.portal-btn {
+    button {
       cursor: pointer;
       background: #00ff66;
       color: black;
@@ -52,11 +50,6 @@
     #status {
       margin-top: 15px;
       font-size: 14px;
-    }
-
-    .secondary-btn {
-      background: black !important;
-      color: #00ff66 !important;
     }
   </style>
 </head>
@@ -79,8 +72,6 @@
   >
 
   <button onclick="printFile()">Print</button>
-
-  <a class="portal-btn secondary-btn" href="/print/scan.html">Open Scanner</a>
 
   <div id="status">Ready</div>
 </div>
@@ -115,7 +106,6 @@ async function printFile() {
     } else {
       status.innerText = "Error: " + data.error;
     }
-
   } catch (err) {
     status.innerText = "Network error";
   }
