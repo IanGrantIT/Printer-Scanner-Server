@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import os
 import cups
@@ -7,6 +8,7 @@ import time
 import shutil
 
 app = Flask(__name__)
+CORS(app)
 
 # Base folder = folder where this file lives
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
