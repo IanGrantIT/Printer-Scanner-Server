@@ -94,7 +94,7 @@ async function printFile() {
   status.innerText = "Printing...";
 
   try {
-    const res = await fetch("http://localhost:5001/api/print", {
+const res = await fetch("/api/print", {
       method: "POST",
       body: formData
     });
